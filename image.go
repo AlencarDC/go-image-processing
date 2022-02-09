@@ -2,6 +2,8 @@ package photochopp
 
 import (
 	"image"
+	"image/draw"
+	"os"
 )
 
 type ColorChannel uint8
@@ -13,7 +15,27 @@ const (
 )
 
 type Image struct {
+	img  *image.Image
 	rgba *image.RGBA
+}
+
+func NewImageFromFilePath(path string) (*Image, error) {
+	reader, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+
+	img, _, err := image.Decode(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	bounds := img.Bounds()
+	rgba := image.NewRGBA(bounds)
+	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
+
+	return &Image{img: &img, rgba: rgba}, nil
 }
 
 func NewImage(rgba *image.RGBA) *Image {
@@ -21,6 +43,14 @@ func NewImage(rgba *image.RGBA) *Image {
 	img.rgba = rgba
 
 	return img
+}
+
+func (img *Image) Image() *image.Image {
+	return img.img
+}
+
+func (img *Image) RGBA() *image.RGBA {
+	return img.rgba
 }
 
 func (img *Image) Width() int {

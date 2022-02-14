@@ -3,11 +3,10 @@ package photochopp
 import (
 	"errors"
 	"fmt"
-	"image"
 )
 
 type Effect interface {
-	Apply(img image.RGBA) (err error)
+	Apply(img *Image) (err error)
 }
 
 type VerticalFlip struct{}

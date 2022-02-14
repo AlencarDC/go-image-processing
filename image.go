@@ -61,6 +61,10 @@ func (img *Image) Height() int {
 	return img.rgba.Bounds().Max.Y
 }
 
+func (img *Image) ImageFromRGBA() image.Image {
+	return img.rgba.SubImage(img.rgba.Bounds())
+}
+
 func (img *Image) Pixel(x, y int) []uint8 {
 	begin := img.rgba.PixOffset(x, y)
 	end := img.rgba.PixOffset(x, y) + 4

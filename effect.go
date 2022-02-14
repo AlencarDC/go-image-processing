@@ -2,7 +2,6 @@ package photochopp
 
 import (
 	"errors"
-	"fmt"
 )
 
 type Effect interface {
@@ -96,7 +95,6 @@ func (cq *ColorQuantization) binSizes(histogram *Histogram) []int {
 		intensitySize := int(highest) - int(lowest) + 1
 
 		binSize := intensitySize / cq.NumberOfDesiredColors
-		fmt.Println(lowest, highest, intensitySize, binSize)
 		binSizes = append(binSizes, binSize)
 	}
 

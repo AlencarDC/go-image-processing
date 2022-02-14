@@ -99,7 +99,12 @@ func NewMainScreen(window *fyne.Window) *MainScreen {
 		mainScreen.applyEffect(hf)
 	})
 
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip)
+	btnGrayScale := widget.NewButton("Gray Scale (Luminance)", func() {
+		l := &photochopp.Luminance{}
+		mainScreen.applyEffect(l)
+	})
+
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"fpi/photochopp"
+	"fpi/photochopp/effects"
 	"image/jpeg"
 	"log"
 	"strconv"
@@ -55,7 +56,7 @@ func (ms *MainScreen) loadImage(path string) {
 	ms.pnlModifiedImage.Add(container.NewCenter(ms.cnvModifiedImage))
 }
 
-func (ms *MainScreen) applyEffect(effect photochopp.Effect) {
+func (ms *MainScreen) applyEffect(effect effects.Effect) {
 	if ms.modifiedImage == nil {
 		log.Println("apply-effect: can not apply effect to a nil image")
 		return
@@ -124,17 +125,17 @@ func NewMainScreen(window *fyne.Window) *MainScreen {
 
 	// EFFECT BUTTONS
 	btnVFlip := widget.NewButton("Vertical Flip", func() {
-		vf := &photochopp.VerticalFlip{}
+		vf := &effects.VerticalFlip{}
 		mainScreen.applyEffect(vf)
 	})
 
 	btnHFlip := widget.NewButton("Horizontal Flip", func() {
-		hf := &photochopp.HorizontalFlip{}
+		hf := &effects.HorizontalFlip{}
 		mainScreen.applyEffect(hf)
 	})
 
 	btnGrayScale := widget.NewButton("Gray Scale (Luminance)", func() {
-		l := &photochopp.Luminance{}
+		l := &effects.Luminance{}
 		mainScreen.applyEffect(l)
 	})
 
@@ -148,7 +149,7 @@ func NewMainScreen(window *fyne.Window) *MainScreen {
 
 	btnColorQuantization := widget.NewButton("Color Quantization", func() {
 		nColors := int(sliderNumberOfColors.Value)
-		cq := &photochopp.ColorQuantization{NumberOfDesiredColors: nColors}
+		cq := &effects.ColorQuantization{NumberOfDesiredColors: nColors}
 		mainScreen.applyEffect(cq)
 	})
 

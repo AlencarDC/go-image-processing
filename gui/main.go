@@ -6,6 +6,7 @@ import (
 	"fpi/photochopp"
 	"image/jpeg"
 	"log"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -138,8 +139,22 @@ func NewMainScreen(window *fyne.Window) *MainScreen {
 		mainScreen.applyEffect(l)
 	})
 
+	lblNumberOfColors := widget.NewLabel("Number of colors: 255")
+	sliderNumberOfColors := widget.NewSlider(1, 255)
+	sliderNumberOfColors.SetValue(255)
+	sliderNumberOfColors.Step = 1
+	sliderNumberOfColors.OnChanged = func(f float64) {
+		lblNumberOfColors.SetText("Number of colors: " + strconv.Itoa(int(f)))
+	}
+
+	btnColorQuantization := widget.NewButton("Color Quantization", func() {
+		nColors := int(sliderNumberOfColors.Value)
+		cq := &photochopp.ColorQuantization{NumberOfDesiredColors: nColors}
+		mainScreen.applyEffect(cq)
+	})
+
 	// MAIN CONTAINER
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, layout.NewSpacer(), btnSaveModified)
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

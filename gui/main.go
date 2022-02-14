@@ -1,11 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"fpi/photochopp"
-	"image"
-	"image/jpeg"
 	"log"
 
 	"fyne.io/fyne/v2"
@@ -19,124 +16,111 @@ import (
 )
 
 type MainScreen struct {
-	originalImage *canvas.Image
-	modifiedImage *canvas.Image
-	mainContainer *fyne.Container
+	originalImage    *photochopp.Image
+	modifiedImage    *photochopp.Image
+	cnvOriginalImage *canvas.Image
+	cnvModifiedImage *canvas.Image
+	pnlOriginalImage *fyne.Container
+	pnlModifiedImage *fyne.Container
+	ctnMain          *fyne.Container
 }
 
-func NewMainScreen() *MainScreen {
-	return nil
+func (ms *MainScreen) loadImage(path string) {
+	var originalErr, modifiedErr error
+	ms.originalImage, originalErr = photochopp.NewImageFromFilePath(path)
+	ms.modifiedImage, modifiedErr = photochopp.NewImageFromFilePath(path)
+
+	if originalErr != nil || modifiedErr != nil {
+		fmt.Println("dialog: error on load image")
+	}
+
+	ms.cnvOriginalImage = canvas.NewImageFromImage(*ms.originalImage.Image())
+	ms.cnvOriginalImage.FillMode = canvas.ImageFillContain
+	ms.cnvOriginalImage.ScaleMode = canvas.ImageScaleFastest
+	ms.cnvOriginalImage.SetMinSize(fyne.Size{Width: float32(ms.originalImage.Width()), Height: float32(ms.originalImage.Height())})
+
+	ms.cnvModifiedImage = canvas.NewImageFromImage(*ms.modifiedImage.Image())
+	ms.cnvModifiedImage.FillMode = canvas.ImageFillContain
+	ms.cnvModifiedImage.ScaleMode = canvas.ImageScaleFastest
+	ms.cnvModifiedImage.SetMinSize(fyne.Size{Width: float32(ms.modifiedImage.Width()), Height: float32(ms.modifiedImage.Height())})
+
+	if len(ms.pnlOriginalImage.Objects) > 1 {
+		ms.pnlOriginalImage.Objects = ms.pnlOriginalImage.Objects[0:1]
+		ms.pnlModifiedImage.Objects = ms.pnlModifiedImage.Objects[0:1]
+	}
+
+	ms.pnlOriginalImage.Add(container.NewCenter(ms.cnvOriginalImage))
+	ms.pnlModifiedImage.Add(container.NewCenter(ms.cnvModifiedImage))
 }
 
-func main() {
+func (ms *MainScreen) applyEffect(effect photochopp.Effect) {
+	if ms.modifiedImage == nil {
+		log.Println("apply-effect: can not apply effect to a nil image")
+		return
+	}
 
-	application := app.New()
-	window := application.NewWindow("Container")
-	window.Resize(fyne.NewSize(1280, 720))
+	err := effect.Apply(ms.modifiedImage)
 
-	// begin := canvas.NewText("(begin)", color.White)
-	// end := canvas.NewText("(end)", color.White)
+	if err != nil {
+		log.Println("apply-effect: error during effect processing")
+	}
 
-	rightPanel2 := container.NewMax()
-	rightPanel := container.NewMax()
+	ms.cnvModifiedImage.Image = ms.modifiedImage.ImageFromRGBA()
+	ms.cnvModifiedImage.Refresh()
+}
 
-	var originalImage, modifiedImage *photochopp.Image
-	var cnvOriginalImage, cnvModifiedImage *canvas.Image
+func NewMainScreen(window *fyne.Window) *MainScreen {
+	mainScreen := new(MainScreen)
+
+	pnlOriginalImage := container.NewMax()
+	pnlModifiedImage := container.NewMax()
+
 	fileLoadDialog := dialog.NewFileOpen(func(fileURI fyne.URIReadCloser, err error) {
 		if fileURI == nil || err != nil {
 			return
 		}
-		fmt.Println("Arquivo selecionado", fileURI.URI())
-		var originalErr, modifiedErr error
-		originalImage, originalErr = photochopp.NewImageFromFilePath(fileURI.URI().Path())
-		modifiedImage, modifiedErr = photochopp.NewImageFromFilePath(fileURI.URI().Path())
-		if originalErr != nil || modifiedErr != nil {
-			fmt.Println("dialog: error on load image")
-		}
-
-		cnvOriginalImage = canvas.NewImageFromImage(*originalImage.Image())
-		cnvOriginalImage.FillMode = canvas.ImageFillContain
-		cnvOriginalImage.ScaleMode = canvas.ImageScaleFastest
-		cnvOriginalImage.SetMinSize(fyne.Size{Width: float32(originalImage.Width()), Height: float32(originalImage.Height())})
-
-		cnvModifiedImage = canvas.NewImageFromImage(*modifiedImage.Image())
-		cnvModifiedImage.FillMode = canvas.ImageFillContain
-		cnvModifiedImage.ScaleMode = canvas.ImageScaleFastest
-		cnvModifiedImage.SetMinSize(fyne.Size{Width: float32(modifiedImage.Width()), Height: float32(modifiedImage.Height())})
-
-		if len(rightPanel.Objects) > 1 {
-			rightPanel.Objects = rightPanel.Objects[0:1]
-			rightPanel2.Objects = rightPanel2.Objects[0:1]
-		}
-
-		rightPanel.Add(container.NewCenter(cnvOriginalImage))
-		rightPanel2.Add(container.NewCenter(cnvModifiedImage))
-	}, window)
+		mainScreen.loadImage(fileURI.URI().Path())
+	}, *window)
 	fileLoadDialog.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".jpeg", ".png"}))
 
 	btnFileLoad := widget.NewButton("Load image", func() {
 		fileLoadDialog.Show()
 	})
-	rightPanel.Add(btnFileLoad)
+	pnlOriginalImage.Add(btnFileLoad)
 
-	// < BUTTONS -----------------------------------------
-	btnHFlip := widget.NewButton("Horizontal Flip", func() {
-		log.Println("Flip Horizontally")
-		if modifiedImage == nil {
-			log.Println("horizontal-flip: can not flip a nil image")
-			return
-		}
-		hf := &photochopp.HorizontalFlip{}
-		hf.Apply(modifiedImage)
-
-		buf := new(bytes.Buffer)
-		rgba := modifiedImage.RGBA()
-		err := jpeg.Encode(buf, rgba, nil)
-		if err != nil {
-			log.Println("convert: error to convert image to buffer")
-			return
-		}
-		newModifiedImage, _, err := image.Decode(buf)
-		if err != nil {
-			log.Println("convert: error to convert buffer to image")
-			return
-		}
-
-		cnvModifiedImage.Image = newModifiedImage
-		cnvModifiedImage.Refresh()
-	})
-
+	// BUTTONS
 	btnVFlip := widget.NewButton("Vertical Flip", func() {
-		log.Println("Flip Vertically Start")
-		if modifiedImage == nil {
-			log.Println("vertical-flip: can not flip a nil image")
-			return
-		}
 		vf := &photochopp.VerticalFlip{}
-		vf.Apply(modifiedImage)
-
-		buf := new(bytes.Buffer)
-		rgba := modifiedImage.RGBA()
-		err := jpeg.Encode(buf, rgba, nil)
-		if err != nil {
-			log.Println("convert: error to convert image to buffer")
-			return
-		}
-		newModifiedImage, _, err := image.Decode(buf)
-		if err != nil {
-			log.Println("convert: error to convert buffer to image")
-			return
-
-		}
-
-		cnvModifiedImage.Image = newModifiedImage
-		cnvModifiedImage.Refresh()
-		log.Println("Flip Vertically End")
+		mainScreen.applyEffect(vf)
 	})
 
-	leftPanel := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip)
-	// > BUTTONS -----------------------------------------
+	btnHFlip := widget.NewButton("Horizontal Flip", func() {
+		hf := &photochopp.HorizontalFlip{}
+		mainScreen.applyEffect(hf)
+	})
 
-	window.SetContent(container.NewBorder(nil, nil, leftPanel, nil, container.NewGridWithColumns(2, rightPanel, rightPanel2)))
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip)
+
+	mainScreen.originalImage = nil
+	mainScreen.modifiedImage = nil
+	mainScreen.cnvOriginalImage = nil
+	mainScreen.cnvModifiedImage = nil
+	mainScreen.pnlOriginalImage = pnlOriginalImage
+	mainScreen.pnlModifiedImage = pnlModifiedImage
+
+	mainScreen.ctnMain = container.NewBorder(nil, nil, pnlEffectButtons, nil, container.NewGridWithColumns(2, pnlOriginalImage, pnlModifiedImage))
+
+	return mainScreen
+}
+
+func main() {
+
+	application := app.New()
+	window := application.NewWindow("Photochopp v1.0")
+	window.Resize(fyne.NewSize(1280, 720))
+
+	mainScreen := NewMainScreen(&window)
+
+	window.SetContent(mainScreen.ctnMain)
 	window.ShowAndRun()
 }

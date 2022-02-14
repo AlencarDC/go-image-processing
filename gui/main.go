@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"fpi/photochopp"
+	"image/jpeg"
 	"log"
 
 	"fyne.io/fyne/v2"
@@ -62,11 +64,22 @@ func (ms *MainScreen) applyEffect(effect photochopp.Effect) {
 	err := effect.Apply(ms.modifiedImage)
 
 	if err != nil {
-		log.Println("apply-effect: error during effect processing")
+		log.Println("apply-effect: error during effect processing", err)
+		return
 	}
 
 	ms.cnvModifiedImage.Image = ms.modifiedImage.ImageFromRGBA()
 	ms.cnvModifiedImage.Refresh()
+}
+
+func (ms *MainScreen) saveModifiedImage() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	err := jpeg.Encode(buf, ms.modifiedImage.ImageFromRGBA(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 func NewMainScreen(window *fyne.Window) *MainScreen {
@@ -75,20 +88,41 @@ func NewMainScreen(window *fyne.Window) *MainScreen {
 	pnlOriginalImage := container.NewMax()
 	pnlModifiedImage := container.NewMax()
 
-	fileLoadDialog := dialog.NewFileOpen(func(fileURI fyne.URIReadCloser, err error) {
+	// SAVE IMAGE BUTTON
+	dlgSaveImage := dialog.NewFileSave(func(uc fyne.URIWriteCloser, e error) {
+		if uc == nil || e != nil {
+			log.Println("save-image: user closed the dialog or unexpected error", e)
+			return
+		}
+		imageBytes, err := mainScreen.saveModifiedImage()
+		if err != nil {
+			log.Println("save-image: can not save the image", err)
+			return
+		}
+		uc.Write(imageBytes)
+	}, *window)
+	dlgSaveImage.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".jpeg", ".png"}))
+
+	btnSaveModified := widget.NewButton("Save Image", func() {
+		dlgSaveImage.Show()
+	})
+
+	// IMAGE LOAD BUTTON
+	dlgImageLoad := dialog.NewFileOpen(func(fileURI fyne.URIReadCloser, err error) {
 		if fileURI == nil || err != nil {
 			return
 		}
+		dlgSaveImage.SetFileName("modified_" + fileURI.URI().Name())
 		mainScreen.loadImage(fileURI.URI().Path())
 	}, *window)
-	fileLoadDialog.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".jpeg", ".png"}))
+	dlgImageLoad.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".jpeg", ".png"}))
 
 	btnFileLoad := widget.NewButton("Load image", func() {
-		fileLoadDialog.Show()
+		dlgImageLoad.Show()
 	})
 	pnlOriginalImage.Add(btnFileLoad)
 
-	// BUTTONS
+	// EFFECT BUTTONS
 	btnVFlip := widget.NewButton("Vertical Flip", func() {
 		vf := &photochopp.VerticalFlip{}
 		mainScreen.applyEffect(vf)
@@ -104,7 +138,8 @@ func NewMainScreen(window *fyne.Window) *MainScreen {
 		mainScreen.applyEffect(l)
 	})
 
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale)
+	// MAIN CONTAINER
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

@@ -171,8 +171,22 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		mainScreen.applyEffect(b)
 	})
 
+	lblContrastValue := widget.NewLabel("Value: 0")
+	sliderContrastValue := widget.NewSlider(-255, 255)
+	sliderContrastValue.SetValue(0)
+	sliderContrastValue.Step = 1
+	sliderContrastValue.OnChanged = func(f float64) {
+		lblContrastValue.SetText("Value: " + strconv.Itoa(int(f)))
+	}
+
+	btnContrast := widget.NewButton("Contrast", func() {
+		value := int(sliderContrastValue.Value)
+		b := &effects.Contrast{Value: value}
+		mainScreen.applyEffect(b)
+	})
+
 	// MAIN CONTAINER
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, layout.NewSpacer(), btnSaveModified)
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

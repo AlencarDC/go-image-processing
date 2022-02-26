@@ -3,12 +3,12 @@ package photochopp
 import "errors"
 
 type Histogram struct {
-	R [256]uint8
-	G [256]uint8
-	B [256]uint8
+	R [256]int32
+	G [256]int32
+	B [256]int32
 }
 
-func (h *Histogram) ForChannel(channel ColorChannel) (*[256]uint8, error) {
+func (h *Histogram) ForChannel(channel ColorChannel) (*[256]int32, error) {
 	switch channel {
 	case RedChannel:
 		return &h.R, nil
@@ -47,6 +47,22 @@ func (h *Histogram) LowestColor(channel ColorChannel) (uint8, error) {
 	}
 
 	return uint8(color), nil
+}
+
+func (h *Histogram) MaxPixelsCount(channel ColorChannel) (int32, error) {
+	hChannel, err := h.ForChannel(channel)
+	if err != nil {
+		return 0, err
+	}
+
+	var maxPixelsCount int32
+	for i, pixelsCount := range hChannel {
+		if i == 0 || pixelsCount > maxPixelsCount {
+			maxPixelsCount = pixelsCount
+		}
+	}
+
+	return maxPixelsCount, nil
 }
 
 func NewHistogram(img *Image) (*Histogram, error) {

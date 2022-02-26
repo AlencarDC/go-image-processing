@@ -116,7 +116,11 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 	// HISTOGRAM BUTTON
 	btnShowHistogram := widget.NewButton("Show Histogram", func() {
 		window := app.NewWindow("histogram", "Histogram", 600, 300)
+		screen := NewHistogramScreen(app, window)
 
+		screen.PlotHistogram(*mainScreen.modifiedImage.Histogram())
+
+		window.SetContent(screen.Content())
 		window.Show()
 	})
 

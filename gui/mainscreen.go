@@ -157,8 +157,22 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		mainScreen.applyEffect(cq)
 	})
 
+	lblBrightnessValue := widget.NewLabel("Value: 0")
+	sliderBrightnessValue := widget.NewSlider(-255, 255)
+	sliderBrightnessValue.SetValue(0)
+	sliderBrightnessValue.Step = 1
+	sliderBrightnessValue.OnChanged = func(f float64) {
+		lblBrightnessValue.SetText("Value: " + strconv.Itoa(int(f)))
+	}
+
+	btnBrightness := widget.NewButton("Brightness", func() {
+		value := int(sliderBrightnessValue.Value)
+		b := &effects.Brightness{Value: value}
+		mainScreen.applyEffect(b)
+	})
+
 	// MAIN CONTAINER
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, layout.NewSpacer(), btnSaveModified)
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

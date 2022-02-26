@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"fpi/photochopp"
 	"fpi/photochopp/effects"
+	"fpi/photochopp/gui/component"
 	"image/jpeg"
 	"log"
+	"path/filepath"
 	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -26,6 +26,10 @@ type MainScreen struct {
 	pnlOriginalImage *fyne.Container
 	pnlModifiedImage *fyne.Container
 	ctnMain          *fyne.Container
+}
+
+func (ms *MainScreen) Content() fyne.CanvasObject {
+	return ms.ctnMain
 }
 
 func (ms *MainScreen) loadImage(path string) {
@@ -83,45 +87,38 @@ func (ms *MainScreen) saveModifiedImage() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func NewMainScreen(window *fyne.Window) *MainScreen {
+func NewMainScreen(app App, window fyne.Window) *MainScreen {
 	mainScreen := new(MainScreen)
 
 	pnlOriginalImage := container.NewMax()
 	pnlModifiedImage := container.NewMax()
 
 	// SAVE IMAGE BUTTON
-	dlgSaveImage := dialog.NewFileSave(func(uc fyne.URIWriteCloser, e error) {
-		if uc == nil || e != nil {
-			log.Println("save-image: user closed the dialog or unexpected error", e)
-			return
-		}
-		imageBytes, err := mainScreen.saveModifiedImage()
-		if err != nil {
-			log.Println("save-image: can not save the image", err)
-			return
-		}
-		uc.Write(imageBytes)
-	}, *window)
-	dlgSaveImage.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".jpeg", ".png"}))
+	dlgSaveImage := component.NewSaveImageDialog(window, mainScreen.saveModifiedImage)
 
 	btnSaveModified := widget.NewButton("Save Image", func() {
 		dlgSaveImage.Show()
 	})
 
 	// IMAGE LOAD BUTTON
-	dlgImageLoad := dialog.NewFileOpen(func(fileURI fyne.URIReadCloser, err error) {
-		if fileURI == nil || err != nil {
-			return
-		}
-		dlgSaveImage.SetFileName("modified_" + fileURI.URI().Name())
-		mainScreen.loadImage(fileURI.URI().Path())
-	}, *window)
-	dlgImageLoad.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".jpeg", ".png"}))
+	dlgImageLoad := component.NewLoadImageDialog(window, func(path string) {
+		mainScreen.loadImage(path)
+
+		_, filename := filepath.Split(path)
+		dlgSaveImage.SetFileName("modified_" + filename)
+	})
 
 	btnFileLoad := widget.NewButton("Load image", func() {
 		dlgImageLoad.Show()
 	})
 	pnlOriginalImage.Add(btnFileLoad)
+
+	// HISTOGRAM BUTTON
+	btnShowHistogram := widget.NewButton("Show Histogram", func() {
+		window := app.NewWindow("histogram", "Histogram", 600, 300)
+
+		window.Show()
+	})
 
 	// EFFECT BUTTONS
 	btnVFlip := widget.NewButton("Vertical Flip", func() {
@@ -154,7 +151,7 @@ func NewMainScreen(window *fyne.Window) *MainScreen {
 	})
 
 	// MAIN CONTAINER
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, layout.NewSpacer(), btnSaveModified)
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

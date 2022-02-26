@@ -1,18 +1,13 @@
 package main
 
-import (
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
-)
+import "log"
 
 func main() {
 
-	application := app.New()
-	window := application.NewWindow("Photochopp v1.0")
-	window.Resize(fyne.NewSize(1280, 720))
+	app, err := NewApp("Photochopp v1.0", 1280, 720)
+	if err != nil {
+		log.Println("app: could not create new app", err)
+	}
 
-	mainScreen := NewMainScreen(&window)
-
-	window.SetContent(mainScreen.ctnMain)
-	window.ShowAndRun()
+	app.Start()
 }

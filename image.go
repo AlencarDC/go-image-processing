@@ -1,8 +1,10 @@
 package photochopp
 
 import (
+	"bytes"
 	"image"
 	"image/draw"
+	"image/jpeg"
 	"os"
 )
 
@@ -83,4 +85,23 @@ func (img *Image) Histogram() *Histogram {
 	histogram, _ := NewHistogram(img)
 
 	return histogram
+}
+
+func (img *Image) Copy() *Image {
+	buffer := new(bytes.Buffer)
+	err := jpeg.Encode(buffer, img.rgba, nil)
+	if err != nil {
+		return nil
+	}
+
+	imgCopy, _, err := image.Decode(buffer)
+	if err != nil {
+		return nil
+	}
+
+	bounds := imgCopy.Bounds()
+	rgba := image.NewRGBA(bounds)
+	draw.Draw(rgba, bounds, imgCopy, bounds.Min, draw.Src)
+
+	return &Image{img: &imgCopy, rgba: rgba}
 }

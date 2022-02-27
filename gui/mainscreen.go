@@ -181,12 +181,17 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 
 	btnContrast := widget.NewButton("Contrast", func() {
 		value := int(sliderContrastValue.Value)
-		b := &effects.Contrast{Value: value}
-		mainScreen.applyEffect(b)
+		c := &effects.Contrast{Value: value}
+		mainScreen.applyEffect(c)
+	})
+
+	btnNegative := widget.NewButton("Negative", func() {
+		n := &effects.Negative{}
+		mainScreen.applyEffect(n)
 	})
 
 	// MAIN CONTAINER
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, layout.NewSpacer(), btnSaveModified)
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

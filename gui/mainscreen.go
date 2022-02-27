@@ -73,7 +73,11 @@ func (ms *MainScreen) applyEffect(effect effects.Effect) {
 		return
 	}
 
-	ms.cnvModifiedImage.Image = ms.modifiedImage.ImageFromRGBA()
+	ms.updateModifiedImage(*ms.modifiedImage)
+}
+
+func (ms *MainScreen) updateModifiedImage(img photochopp.Image) {
+	ms.cnvModifiedImage.Image = img.ImageFromRGBA()
 	ms.cnvModifiedImage.Refresh()
 }
 
@@ -190,8 +194,25 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		mainScreen.applyEffect(n)
 	})
 
+	btnHistogramEqualization := widget.NewButton("Histogram Equalization", func() {
+		heImage := mainScreen.modifiedImage.Copy()
+		he := &effects.GrayScaleHistogramEqualization{}
+		he.Apply(heImage)
+
+		width, height := float32(heImage.Width()), float32(heImage.Height())
+
+		window := app.NewWindow("equalization", "Histogram Equalization", width, height)
+		screen := NewPreviewScreen(app, window)
+		screen.SetCallback(mainScreen.updateModifiedImage)
+
+		screen.SetImage(*heImage)
+
+		window.SetContent(screen.Content())
+		window.Show()
+	})
+
 	// MAIN CONTAINER
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, layout.NewSpacer(), btnSaveModified)
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

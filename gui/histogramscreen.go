@@ -45,10 +45,7 @@ func NewHistogramScreen(app App, window fyne.Window) *HistogramScreen {
 	histogramScreen := new(HistogramScreen)
 	histogramScreen.window = window
 
-	line := canvas.NewLine(color.White)
-	line.StrokeWidth = 5
-
-	histogramScreen.ctnMain = container.NewCenter(line)
+	histogramScreen.ctnMain = container.NewCenter()
 
 	return histogramScreen
 }

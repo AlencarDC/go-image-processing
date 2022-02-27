@@ -5,3 +5,7 @@
   Utilize o comando `sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev` no Ubuntu.
   Para outros sistemas operacionais consulte a documentação da [biblioteca Fyne](https://developer.fyne.io/started/).
 3. Na raíz do projeto, execute `go run ./gui` para compilar e executar o programa.
+
+
+# TODO
+- Adicionar um interceptador no fechamento das janelas para remover do map de janelas

@@ -226,18 +226,18 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		mainScreen.applyEffect(filter)
 	})
 
-	btnPrewittHorizontalFilter := widget.NewButton("Prewitt Hx Filter", func() {
-		filter := &effects.PrewittHorizontalFilter{}
+	btnHorizontalPrewittFilter := widget.NewButton("Prewitt Hx Filter", func() {
+		filter := &effects.HorizontalPrewittFilter{}
 		mainScreen.applyEffect(filter)
 	})
 
-	btnPrewittVerticalFilter := widget.NewButton("Prewitt Hy Filter", func() {
-		filter := &effects.PrewittVerticalFilter{}
+	btnVerticalPrewittFilter := widget.NewButton("Prewitt Hy Filter", func() {
+		filter := &effects.VerticalPrewittFilter{}
 		mainScreen.applyEffect(filter)
 	})
 
 	// MAIN CONTAINER
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, btnPrewittHorizontalFilter, btnPrewittVerticalFilter, layout.NewSpacer(), btnSaveModified)
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, btnHorizontalPrewittFilter, btnVerticalPrewittFilter, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

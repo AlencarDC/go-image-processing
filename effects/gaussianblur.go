@@ -20,7 +20,7 @@ func (gb *GaussianBlur) Apply(img *photochopp.Image) (err error) {
 		return errors.New("effect: cannot apply Gaussian Blur to a nil image")
 	}
 
-	convolve := Convolve{Kernel: GaussianKernel(), Clampping: false}
+	convolve := Convolve{Kernel: GaussianKernel(), ShouldEmboss: false}
 	convolve.Apply(img)
 
 	return nil

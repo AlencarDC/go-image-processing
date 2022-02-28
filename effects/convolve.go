@@ -7,8 +7,8 @@ import (
 )
 
 type Convolve struct {
-	Clampping bool
-	Kernel    [][]float32
+	ShouldEmboss bool
+	Kernel       [][]float32
 }
 
 func (c *Convolve) Apply(img *photochopp.Image) (err error) {
@@ -27,7 +27,7 @@ func (c *Convolve) Apply(img *photochopp.Image) (err error) {
 				continue
 			}
 
-			if c.Clampping {
+			if c.ShouldEmboss {
 				convolvedPixel = c.embossPixel(convolvedPixel)
 			}
 

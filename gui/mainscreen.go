@@ -221,8 +221,13 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		mainScreen.applyEffect(filter)
 	})
 
+	btnHighPassFilter := widget.NewButton("High Pass Filter", func() {
+		filter := &effects.HighPassFilter{}
+		mainScreen.applyEffect(filter)
+	})
+
 	// MAIN CONTAINER
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, layout.NewSpacer(), btnSaveModified)
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

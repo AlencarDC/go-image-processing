@@ -28,10 +28,10 @@ func (c *Convolve) Apply(img *photochopp.Image) (err error) {
 			}
 
 			if c.Clampping {
-				convolvedPixel = c.clampPixel(convolvedPixel)
+				convolvedPixel = c.embossPixel(convolvedPixel)
 			}
 
-			newPixel := c.fitPixelValues(convolvedPixel)
+			newPixel := c.clampPixel(convolvedPixel)
 
 			pixel := img.Pixel(x, y)
 			pixel[0] = newPixel[0]
@@ -67,11 +67,11 @@ func (c *Convolve) convolvePixel(img *photochopp.Image, x, y int) ([3]float32, e
 	return convolvedPixel, nil
 }
 
-func (c *Convolve) clampPixel(pixel [3]float32) [3]float32 {
+func (c *Convolve) embossPixel(pixel [3]float32) [3]float32 {
 	return [3]float32{pixel[0] + 127, pixel[1] + 127, pixel[2] + 127}
 }
 
-func (c *Convolve) fitPixelValues(pixel [3]float32) [3]uint8 {
+func (c *Convolve) clampPixel(pixel [3]float32) [3]uint8 {
 	return [3]uint8{
 		uint8(math.Max(0, math.Min(float64(pixel[0]), 255))),
 		uint8(math.Max(0, math.Min(float64(pixel[1]), 255))),

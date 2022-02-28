@@ -241,8 +241,13 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		mainScreen.applyEffect(filter)
 	})
 
+	btnVerticalSobelFilter := widget.NewButton("Sobel Hy Filter", func() {
+		filter := &effects.VerticalSobelFilter{}
+		mainScreen.applyEffect(filter)
+	})
+
 	// MAIN CONTAINER
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, btnHorizontalPrewittFilter, btnVerticalPrewittFilter, btnHorizontalSobelFilter, layout.NewSpacer(), btnSaveModified)
+	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, btnHorizontalPrewittFilter, btnVerticalPrewittFilter, btnHorizontalSobelFilter, btnVerticalSobelFilter, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil

@@ -59,8 +59,17 @@ func (img *Image) Width() int {
 	return img.rgba.Bounds().Max.X
 }
 
+func (img *Image) SetWidth(width int) {
+	img.rgba.Rect.Max.X = width
+	img.rgba.Stride = width * 4
+}
+
 func (img *Image) Height() int {
 	return img.rgba.Bounds().Max.Y
+}
+
+func (img *Image) SetHeight(height int) {
+	img.rgba.Rect.Max.Y = height
 }
 
 func (img *Image) ImageFromRGBA() image.Image {

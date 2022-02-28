@@ -19,10 +19,11 @@ func (c *Convolve) Apply(img *photochopp.Image) (err error) {
 	width, height := img.Width(), img.Height()
 	kernelHeight := len(c.Kernel)
 	kernelWidth := len(c.Kernel[0])
+	imgCopy := img.Copy()
 
 	for x := kernelWidth / 2; x < width-(kernelWidth/2); x += 1 {
 		for y := kernelHeight / 2; y < height-(kernelHeight/2); y += 1 {
-			convolvedPixel, err := c.convolvePixel(img, x, y)
+			convolvedPixel, err := c.convolvePixel(imgCopy, x, y)
 			if err != nil {
 				continue
 			}
@@ -63,7 +64,6 @@ func (c *Convolve) convolvePixel(img *photochopp.Image, x, y int) ([3]float32, e
 			convolvedPixel[2] += float32(pixel[2]) * kernelValue
 		}
 	}
-
 	return convolvedPixel, nil
 }
 

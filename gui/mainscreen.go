@@ -268,7 +268,10 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 	})
 
 	// MAIN CONTAINER
-	pnlEffectButtons := container.New(layout.NewVBoxLayout(), btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, btnHorizontalPrewittFilter, btnVerticalPrewittFilter, btnHorizontalSobelFilter, btnVerticalSobelFilter, btnRotateClockwiseFilter, btnRotateCounterClockwiseFilter, btnZoomOut, btnZoomIn, layout.NewSpacer(), btnSaveModified)
+	pnlEffectButtons := container.NewVBox(btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, btnHorizontalPrewittFilter, btnVerticalPrewittFilter, btnHorizontalSobelFilter, btnVerticalSobelFilter, btnRotateClockwiseFilter, btnRotateCounterClockwiseFilter, btnZoomOut, btnZoomIn)
+	scrollButtons := container.NewVScroll(container.NewPadded(pnlEffectButtons))
+	scrollButtons.SetMinSize(fyne.NewSize(0, 650))
+	ctnButtons := container.NewVBox(scrollButtons, layout.NewSpacer(), btnSaveModified)
 
 	mainScreen.originalImage = nil
 	mainScreen.modifiedImage = nil
@@ -277,7 +280,7 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 	mainScreen.pnlOriginalImage = pnlOriginalImage
 	mainScreen.pnlModifiedImage = pnlModifiedImage
 
-	mainScreen.ctnMain = container.NewBorder(nil, nil, pnlEffectButtons, nil, container.NewGridWithColumns(2, pnlOriginalImage, pnlModifiedImage))
+	mainScreen.ctnMain = container.NewBorder(nil, nil, ctnButtons, nil, container.NewGridWithColumns(2, pnlOriginalImage, pnlModifiedImage))
 
 	return mainScreen
 }

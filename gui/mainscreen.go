@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -101,7 +102,7 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 	// SAVE IMAGE BUTTON
 	dlgSaveImage := component.NewSaveImageDialog(window, mainScreen.saveModifiedImage)
 
-	btnSaveModified := widget.NewButton("Save Image", func() {
+	btnSaveModified := widget.NewButtonWithIcon("Save Image", theme.DocumentSaveIcon(), func() {
 		dlgSaveImage.Show()
 	})
 

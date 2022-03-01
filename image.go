@@ -55,6 +55,10 @@ func (img *Image) RGBA() *image.RGBA {
 	return img.rgba
 }
 
+func (img *Image) SetRGBA(rgba *image.RGBA) {
+	img.rgba = rgba
+}
+
 func (img *Image) Width() int {
 	return img.rgba.Bounds().Max.X
 }
@@ -70,6 +74,10 @@ func (img *Image) Height() int {
 
 func (img *Image) SetHeight(height int) {
 	img.rgba.Rect.Max.Y = height
+}
+
+func (img *Image) IsValidPosition(x, y int) bool {
+	return x >= 0 && x < img.Width() && y >= 0 && y < img.Height()
 }
 
 func (img *Image) ImageFromRGBA() image.Image {

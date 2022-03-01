@@ -38,6 +38,20 @@ func (hs *HistogramScreen) PlotHistogram(histogram photochopp.Histogram) {
 		histogramBox.Add(line)
 	}
 
+	hLine := canvas.NewLine(color.White)
+	hLine.StrokeWidth = 2
+	hLine.Position1 = fyne.Position{X: 0, Y: MAX_HEIGHT + 4}
+	hLine.Position2 = fyne.Position{X: 255 * 2, Y: MAX_HEIGHT + 4}
+	histogramBox.Add(hLine)
+
+	lBegin := canvas.NewText("0", color.White)
+	histogramBox.Add(lBegin)
+	lBegin.Move(fyne.Position{X: 0, Y: MAX_HEIGHT + 8})
+
+	lEnd := canvas.NewText("255", color.White)
+	histogramBox.Add(lEnd)
+	lEnd.Move(fyne.Position{255 * 2, MAX_HEIGHT + 8})
+
 	hs.ctnMain = container.NewMax(histogramBox)
 }
 

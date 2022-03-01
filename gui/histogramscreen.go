@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/widget"
 )
 
 type HistogramScreen struct {
@@ -38,7 +40,17 @@ func (hs *HistogramScreen) PlotHistogram(histogram photochopp.Histogram) {
 		histogramBox.Add(line)
 	}
 
-	hs.ctnMain = container.NewMax(histogramBox)
+	gradient := canvas.NewHorizontalGradient(color.Black, color.White)
+	gradientImage := canvas.NewImageFromImage(gradient.Generate(255*2, 8))
+	gradientImage.FillMode = canvas.ImageFillOriginal
+	gradientImage.ScaleMode = canvas.ImageScaleFastest
+	gradientImage.SetMinSize(fyne.Size{Width: 255 * 2, Height: 8})
+
+	lblBegin := widget.NewLabel("0")
+	lblEnd := widget.NewLabel("255")
+	ctnLabels := container.NewHBox(lblBegin, layout.NewSpacer(), lblEnd)
+
+	hs.ctnMain = container.NewPadded(container.NewVBox(histogramBox, layout.NewSpacer(), gradientImage, ctnLabels))
 }
 
 func NewHistogramScreen(app App, window fyne.Window) *HistogramScreen {

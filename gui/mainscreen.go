@@ -120,7 +120,7 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 
 	// HISTOGRAM BUTTON
 	btnShowHistogram := widget.NewButton("Show Histogram", func() {
-		window := app.NewWindow("histogram", "Histogram", 600, 300)
+		window := app.NewWindow("histogram", "Histogram", 515, 330)
 		screen := NewHistogramScreen(app, window)
 
 		l := &effects.Luminance{}

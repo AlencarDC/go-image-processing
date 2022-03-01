@@ -28,9 +28,7 @@ func (z *ZoomOut) Apply(img *photochopp.Image) (err error) {
 			avgPixel := z.calculateAvgPixel(img, rect)
 
 			pixel := newImage.Pixel(x, y)
-			pixel[0] = avgPixel[0]
-			pixel[1] = avgPixel[1]
-			pixel[2] = avgPixel[2]
+			copy(pixel, avgPixel)
 		}
 	}
 
@@ -56,5 +54,6 @@ func (z *ZoomOut) calculateAvgPixel(img *photochopp.Image, rect image.Rectangle)
 		uint8(sum[0] / (z.XFactor * z.YFactor)),
 		uint8(sum[1] / (z.XFactor * z.YFactor)),
 		uint8(sum[2] / (z.XFactor * z.YFactor)),
+		255,
 	}
 }

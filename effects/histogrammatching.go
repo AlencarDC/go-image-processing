@@ -3,7 +3,6 @@ package effects
 import (
 	"errors"
 	"fpi/photochopp"
-	"log"
 	"math"
 )
 
@@ -38,14 +37,6 @@ func (hm *HistogramMatching) Apply(img *photochopp.Image) (err error) {
 		indexDiff := arrayAbsDiff(indexOfMinValues, int32(i))
 		minIndex := arrayIndexOfMinValue(indexDiff)
 		closestColor := indexOfMinValues[minIndex]
-		if i == 18 {
-			log.Println("sourceCumulativeHistogram[i]", sourceCumulativeHistogram[i])
-			log.Println("targetCumulativeHistogram[:]", targetCumulativeHistogram[:])
-			log.Println("histogramDiff", histogramDiff)
-			log.Println("indexOfMinValues", indexOfMinValues)
-			log.Println("indexDiff", indexDiff)
-			log.Println("closestColor", closestColor)
-		}
 
 		HM[i] = closestColor
 	}

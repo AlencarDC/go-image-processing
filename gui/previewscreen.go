@@ -12,7 +12,9 @@ import (
 
 type PreviewScreen struct {
 	window        fyne.Window
-	image         photochopp.Image
+	srcImage      photochopp.Image
+	dstImage      photochopp.Image
+	cntImages     *fyne.Container
 	ctnMain       *fyne.Container
 	applyCallback func(photochopp.Image)
 }
@@ -25,15 +27,42 @@ func (ps *PreviewScreen) SetCallback(callback func(photochopp.Image)) {
 	ps.applyCallback = callback
 }
 
-func (ps *PreviewScreen) SetImage(img photochopp.Image) {
-	ps.image = img
+func (ps *PreviewScreen) SetSrcImage(img photochopp.Image) {
+	ps.srcImage = img
+	ps.update()
+}
 
+func (ps *PreviewScreen) SetDstImage(img photochopp.Image) {
+	ps.dstImage = img
+	ps.update()
+}
+
+func (ps *PreviewScreen) update() {
+	ps.cntImages = container.NewGridWithColumns(1)
+	if !ps.srcImage.IsEmpty() && !ps.dstImage.IsEmpty() {
+		ps.cntImages = container.NewGridWithColumns(2)
+	}
+
+	if !ps.srcImage.IsEmpty() {
+		cnvImage := ps.createCanvasImage(ps.srcImage)
+		ps.cntImages.Add(container.NewCenter(cnvImage))
+	}
+	if !ps.dstImage.IsEmpty() {
+		cnvImage := ps.createCanvasImage(ps.dstImage)
+		ps.cntImages.Add(container.NewCenter(cnvImage))
+	}
+	ps.ctnMain.Objects[0] = ps.cntImages
+}
+
+func (ps *PreviewScreen) createCanvasImage(img photochopp.Image) *canvas.Image {
+	size := fyne.Size{Width: float32(img.Width()), Height: float32(img.Height())}
 	cnvImage := canvas.NewImageFromImage(img.ImageFromRGBA())
-	cnvImage.FillMode = canvas.ImageFillContain
+	cnvImage.FillMode = canvas.ImageFillOriginal
 	cnvImage.ScaleMode = canvas.ImageScaleFastest
-	cnvImage.SetMinSize(fyne.Size{Width: float32(img.Width()), Height: float32(img.Height())})
+	cnvImage.SetMinSize(size)
+	cnvImage.Resize(size)
 
-	ps.ctnMain.Objects[0] = container.NewCenter(cnvImage)
+	return cnvImage
 }
 
 func NewPreviewScreen(app App, window fyne.Window) *PreviewScreen {
@@ -42,13 +71,14 @@ func NewPreviewScreen(app App, window fyne.Window) *PreviewScreen {
 
 	btnApply := widget.NewButton("Apply", func() {
 		if previewScreen.applyCallback != nil {
-			previewScreen.applyCallback(previewScreen.image)
+			previewScreen.applyCallback(previewScreen.dstImage)
 			previewScreen.window.Close()
 		}
 	})
 	ctnButton := container.NewHBox(layout.NewSpacer(), btnApply)
+	ctnImages := container.NewGridWithColumns(2)
 
-	previewScreen.ctnMain = container.NewVBox(container.NewCenter(), ctnButton)
+	previewScreen.ctnMain = container.NewVBox(ctnImages, ctnButton)
 
 	return previewScreen
 }

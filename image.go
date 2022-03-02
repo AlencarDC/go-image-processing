@@ -59,6 +59,10 @@ func (img *Image) SetRGBA(rgba *image.RGBA) {
 	img.rgba = rgba
 }
 
+func (img *Image) IsEmpty() bool {
+	return img.rgba == nil
+}
+
 func (img *Image) Width() int {
 	return img.rgba.Bounds().Max.X
 }

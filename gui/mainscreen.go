@@ -207,7 +207,7 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		screen := NewPreviewScreen(app, window)
 		screen.SetCallback(mainScreen.updateModifiedImage)
 
-		screen.SetImage(*heImage)
+		screen.SetDstImage(*heImage)
 
 		window.SetContent(screen.Content())
 		window.Show()
@@ -268,8 +268,37 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		mainScreen.applyEffect(filter)
 	})
 
+	dlgHistogramMatching := component.NewLoadImageDialog(window, func(path string) {
+		img, err := photochopp.NewImageFromFilePath(path)
+		if err != nil {
+			log.Println("histogram-matching: unable to load image")
+		}
+
+		luminance := &effects.Luminance{}
+		luminance.Apply(img)
+
+		copyImage := mainScreen.modifiedImage.Copy()
+		hm := &effects.HistogramMatching{Target: *img}
+		hm.Apply(copyImage)
+
+		width, height := float32(img.Width()), float32(img.Height())
+		window := app.NewWindow("matching", "Histogram Matching", width, height)
+		screen := NewPreviewScreen(app, window)
+		screen.SetCallback(mainScreen.updateModifiedImage)
+
+		screen.SetSrcImage(*img)
+		screen.SetDstImage(*copyImage)
+
+		window.SetContent(screen.Content())
+		window.Show()
+	})
+
+	btnHistogramMatching := widget.NewButton("Histogram Matching", func() {
+		dlgHistogramMatching.Show()
+	})
+
 	// MAIN CONTAINER
-	pnlEffectButtons := container.NewVBox(btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, btnHorizontalPrewittFilter, btnVerticalPrewittFilter, btnHorizontalSobelFilter, btnVerticalSobelFilter, btnRotateClockwiseFilter, btnRotateCounterClockwiseFilter, btnZoomOut, btnZoomIn)
+	pnlEffectButtons := container.NewVBox(btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, btnHorizontalPrewittFilter, btnVerticalPrewittFilter, btnHorizontalSobelFilter, btnVerticalSobelFilter, btnRotateClockwiseFilter, btnRotateCounterClockwiseFilter, btnZoomOut, btnZoomIn, btnHistogramMatching)
 	scrollButtons := container.NewVScroll(container.NewPadded(pnlEffectButtons))
 	scrollButtons.SetMinSize(fyne.NewSize(0, 650))
 	ctnButtons := container.NewVBox(scrollButtons, layout.NewSpacer(), btnSaveModified)

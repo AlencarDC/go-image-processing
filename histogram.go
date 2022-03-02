@@ -65,6 +65,25 @@ func (h *Histogram) MaxPixelsCount(channel ColorChannel) (int32, error) {
 	return maxPixelsCount, nil
 }
 
+func (h *Histogram) CumulativeHistogram(channel ColorChannel, scalingFactor float32) ([256]int32, error) {
+	histogram, err := h.ForChannel(channel)
+	if err != nil {
+		return [256]int32{}, err
+	}
+
+	var cumulativeHistogram [256]int32
+	cumulativeHistogram[0] = histogram[0]
+	for i := 1; i < len(histogram); i += 1 {
+		cumulativeHistogram[i] = cumulativeHistogram[i-1] + histogram[i]
+	}
+
+	for i := 0; i < len(histogram); i += 1 {
+		cumulativeHistogram[i] = int32(float32(cumulativeHistogram[i]) * scalingFactor)
+	}
+
+	return cumulativeHistogram, nil
+}
+
 func NewHistogram(img *Image) (*Histogram, error) {
 	if img == nil {
 		return nil, errors.New("histogram: cannot create from nil image")

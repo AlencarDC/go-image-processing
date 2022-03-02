@@ -13,8 +13,10 @@ func (he *GrayScaleHistogramEqualization) Apply(img *photochopp.Image) (err erro
 	}
 
 	scalingFactor := 255.0 / float32((img.Height() * img.Width()))
-	histogram := img.Histogram().B
-	cumulativeHistogram := he.computeCumulativeHistogram(scalingFactor, histogram)
+	cumulativeHistogram, err := img.Histogram().CumulativeHistogram(photochopp.BlueChannel, scalingFactor)
+	if err != nil {
+		return err
+	}
 
 	for x := 0; x < img.Width(); x += 1 {
 		for y := 0; y < img.Height(); y += 1 {
@@ -26,20 +28,4 @@ func (he *GrayScaleHistogramEqualization) Apply(img *photochopp.Image) (err erro
 	}
 
 	return nil
-}
-
-func (he *GrayScaleHistogramEqualization) renormalizedValue(scalingFactor, histogramValue float32) int32 {
-	return int32(scalingFactor * histogramValue)
-}
-
-func (he *GrayScaleHistogramEqualization) computeCumulativeHistogram(scalingFactor float32, histogram [256]int32) [256]int32 {
-	var cumulativeHistogram [256]int32
-	cumulativeHistogram[0] = he.renormalizedValue(scalingFactor, float32(histogram[0]))
-
-	for i := 1; i < len(histogram); i += 1 {
-		renormalizedValue := he.renormalizedValue(scalingFactor, float32(histogram[i]))
-		cumulativeHistogram[i] = cumulativeHistogram[i-1] + renormalizedValue
-	}
-
-	return cumulativeHistogram
 }

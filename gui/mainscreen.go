@@ -162,6 +162,7 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		cq := &effects.ColorQuantization{NumberOfDesiredColors: nColors}
 		mainScreen.applyEffect(cq)
 	})
+	ctnColorQuantization := container.NewVBox(lblNumberOfColors, sliderNumberOfColors, btnColorQuantization)
 
 	lblBrightnessValue := widget.NewLabel("Value: 0")
 	sliderBrightnessValue := widget.NewSlider(-255, 255)
@@ -176,6 +177,7 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		b := &effects.Brightness{Value: value}
 		mainScreen.applyEffect(b)
 	})
+	ctnBrightness := container.NewVBox(lblBrightnessValue, sliderBrightnessValue, btnBrightness)
 
 	lblContrastValue := widget.NewLabel("Value: 0")
 	sliderContrastValue := widget.NewSlider(-255, 255)
@@ -190,6 +192,7 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		c := &effects.Contrast{Value: value}
 		mainScreen.applyEffect(c)
 	})
+	ctnContrast := container.NewVBox(lblContrastValue, sliderContrastValue, btnContrast)
 
 	btnNegative := widget.NewButton("Negative", func() {
 		n := &effects.Negative{}
@@ -228,6 +231,23 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		mainScreen.applyEffect(filter)
 	})
 
+	btnCustomKernelFilter := widget.NewButton("Custom Filter", func() {
+		window := app.NewWindow("custom-kernel", "Custom Kernel Filter", 300, 200)
+		screen := NewKernelPreviewScreen(app, window)
+		screen.SetCallback(func(kernel [][]float32, emboss, grayScale bool) {
+			if grayScale {
+				luminance := &effects.Luminance{}
+				mainScreen.applyEffect(luminance)
+			}
+
+			filter := &effects.Convolve{Kernel: kernel, ShouldEmboss: emboss}
+			mainScreen.applyEffect(filter)
+		})
+
+		window.SetContent(screen.Content())
+		window.Show()
+	})
+
 	btnHorizontalPrewittFilter := widget.NewButton("Prewitt Hx Filter", func() {
 		filter := &effects.HorizontalPrewittFilter{}
 		mainScreen.applyEffect(filter)
@@ -248,12 +268,12 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		mainScreen.applyEffect(filter)
 	})
 
-	btnRotateClockwiseFilter := widget.NewButton("Rotate 90° Clockwise", func() {
+	btnRotateClockwise := widget.NewButton("Rotate 90° Clockwise", func() {
 		filter := &effects.Rotation90Degree{RotateClockwise: true}
 		mainScreen.applyEffect(filter)
 	})
 
-	btnRotateCounterClockwiseFilter := widget.NewButton("Rotate 90° Counterclockwise", func() {
+	btnRotateCounterClockwise := widget.NewButton("Rotate 90° Counterclockwise", func() {
 		filter := &effects.Rotation90Degree{RotateClockwise: false}
 		mainScreen.applyEffect(filter)
 	})
@@ -297,8 +317,16 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		dlgHistogramMatching.Show()
 	})
 
+	// BUTTON CONTAINERS
+	lblTransform := widget.NewLabelWithStyle("Transform", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	ctnTransformButtons := container.NewVBox(lblTransform, btnVFlip, btnHFlip, btnRotateClockwise, btnRotateCounterClockwise, btnZoomIn, btnZoomOut)
+	lblAdjustments := widget.NewLabelWithStyle("Adjustments", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	ctnAdjustmentsButtons := container.NewVBox(lblAdjustments, btnShowHistogram, btnGrayScale, btnNegative, btnHistogramEqualization, btnHistogramMatching, ctnColorQuantization, ctnBrightness, ctnContrast)
+	lblFilters := widget.NewLabelWithStyle("Filters", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	ctnFiltersButtons := container.NewVBox(lblFilters, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, btnHorizontalPrewittFilter, btnVerticalPrewittFilter, btnHorizontalSobelFilter, btnVerticalSobelFilter, btnCustomKernelFilter)
+
 	// MAIN CONTAINER
-	pnlEffectButtons := container.NewVBox(btnHFlip, btnVFlip, btnGrayScale, lblNumberOfColors, sliderNumberOfColors, btnColorQuantization, btnShowHistogram, lblBrightnessValue, sliderBrightnessValue, btnBrightness, lblContrastValue, sliderContrastValue, btnContrast, btnNegative, btnHistogramEqualization, btnGaussianBlur, btnLaplacianFilter, btnHighPassFilter, btnHorizontalPrewittFilter, btnVerticalPrewittFilter, btnHorizontalSobelFilter, btnVerticalSobelFilter, btnRotateClockwiseFilter, btnRotateCounterClockwiseFilter, btnZoomOut, btnZoomIn, btnHistogramMatching)
+	pnlEffectButtons := container.NewVBox(ctnTransformButtons, ctnAdjustmentsButtons, ctnFiltersButtons)
 	scrollButtons := container.NewVScroll(container.NewPadded(pnlEffectButtons))
 	scrollButtons.SetMinSize(fyne.NewSize(0, 650))
 	ctnButtons := container.NewVBox(scrollButtons, layout.NewSpacer(), btnSaveModified)

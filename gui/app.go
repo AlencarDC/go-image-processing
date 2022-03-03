@@ -20,8 +20,8 @@ func (app *App) Start() {
 		return
 	}
 
-	window.ShowAndRun()
 	log.Println("app: started")
+	window.ShowAndRun()
 }
 
 func (app *App) NewWindow(id, name string, width, height float32) fyne.Window {

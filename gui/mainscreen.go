@@ -164,12 +164,12 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 	})
 	ctnColorQuantization := container.NewVBox(lblNumberOfColors, sliderNumberOfColors, btnColorQuantization)
 
-	lblBrightnessValue := widget.NewLabel("Value: 0")
+	lblBrightnessValue := widget.NewLabel("Brightness value: 0")
 	sliderBrightnessValue := widget.NewSlider(-255, 255)
 	sliderBrightnessValue.SetValue(0)
 	sliderBrightnessValue.Step = 1
 	sliderBrightnessValue.OnChanged = func(f float64) {
-		lblBrightnessValue.SetText("Value: " + strconv.Itoa(int(f)))
+		lblBrightnessValue.SetText("Brightness value: " + strconv.Itoa(int(f)))
 	}
 
 	btnBrightness := widget.NewButton("Brightness", func() {
@@ -179,12 +179,12 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 	})
 	ctnBrightness := container.NewVBox(lblBrightnessValue, sliderBrightnessValue, btnBrightness)
 
-	lblContrastValue := widget.NewLabel("Value: 0")
+	lblContrastValue := widget.NewLabel("Contrast value: 0")
 	sliderContrastValue := widget.NewSlider(-255, 255)
 	sliderContrastValue.SetValue(0)
 	sliderContrastValue.Step = 1
 	sliderContrastValue.OnChanged = func(f float64) {
-		lblContrastValue.SetText("Value: " + strconv.Itoa(int(f)))
+		lblContrastValue.SetText("Contrast value: " + strconv.Itoa(int(f)))
 	}
 
 	btnContrast := widget.NewButton("Contrast", func() {
@@ -278,10 +278,23 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		mainScreen.applyEffect(filter)
 	})
 
+	lblXFactor := widget.NewLabel("X:")
+	entryXFactor := component.NewNumericalEntry()
+	entryXFactor.Text = "1"
+	lblYFactor := widget.NewLabel("Y:")
+	entryYFactor := component.NewNumericalEntry()
+	entryYFactor.Text = "1"
+
 	btnZoomOut := widget.NewButton("Zoom Out", func() {
-		filter := &effects.ZoomOut{XFactor: 2, YFactor: 2}
+		xFactor, xErr := strconv.ParseInt(entryXFactor.Text, 10, 32)
+		yFactor, yErr := strconv.ParseInt(entryYFactor.Text, 10, 32)
+		if xErr != nil || yErr != nil {
+			return
+		}
+		filter := &effects.ZoomOut{XFactor: int(xFactor), YFactor: int(yFactor)}
 		mainScreen.applyEffect(filter)
 	})
+	ctnZoomOut := container.NewVBox(container.NewGridWithColumns(2, container.NewHBox(lblXFactor, entryXFactor), container.NewHBox(lblYFactor, entryYFactor)), btnZoomOut)
 
 	btnZoomIn := widget.NewButton("Zoom In", func() {
 		filter := &effects.ZoomIn{}
@@ -319,7 +332,7 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 
 	// BUTTON CONTAINERS
 	lblTransform := widget.NewLabelWithStyle("Transform", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	ctnTransformButtons := container.NewVBox(lblTransform, btnVFlip, btnHFlip, btnRotateClockwise, btnRotateCounterClockwise, btnZoomIn, btnZoomOut)
+	ctnTransformButtons := container.NewVBox(lblTransform, btnVFlip, btnHFlip, btnRotateClockwise, btnRotateCounterClockwise, btnZoomIn, ctnZoomOut)
 	lblAdjustments := widget.NewLabelWithStyle("Adjustments", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	ctnAdjustmentsButtons := container.NewVBox(lblAdjustments, btnShowHistogram, btnGrayScale, btnNegative, btnHistogramEqualization, btnHistogramMatching, ctnColorQuantization, ctnBrightness, ctnContrast)
 	lblFilters := widget.NewLabelWithStyle("Filters", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})

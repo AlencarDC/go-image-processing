@@ -16,6 +16,10 @@ func (z *ZoomOut) Apply(img *photochopp.Image) (err error) {
 		return errors.New("effect: cannot apply ZoomOut to a nil image")
 	}
 
+	if z.XFactor < 1 || z.YFactor < 1 {
+		return errors.New("effect: zoom out factors need to be greater than or equal to 1")
+	}
+
 	newWidth, newHeight := img.Width()/z.XFactor, img.Height()/z.YFactor
 
 	newRGBA := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))

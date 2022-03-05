@@ -121,15 +121,10 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 
 	// HISTOGRAM BUTTON
 	btnShowHistogram := widget.NewButton("Show Histogram", func() {
-		window := app.NewWindow("histogram", "Histogram", 515, 330)
-		screen := NewHistogramScreen(app, window)
-
 		l := &effects.Luminance{}
 		mainScreen.applyEffect(l)
-
-		screen.PlotHistogram(*mainScreen.modifiedImage.Histogram())
-
-		window.SetContent(screen.Content())
+		histogram, _ := mainScreen.modifiedImage.Histogram().ForChannel(photochopp.GrayChannel)
+		window := NewHistogramWindow("histogram", "Histogram", app, *histogram)
 		window.Show()
 	})
 
@@ -210,10 +205,31 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 		screen := NewPreviewScreen(app, window)
 		screen.SetCallback(mainScreen.updateModifiedImage)
 
+		screen.SetSrcImage(*mainScreen.modifiedImage)
 		screen.SetDstImage(*heImage)
 
 		window.SetContent(screen.Content())
 		window.Show()
+
+		var histBefore, histAfter [256]int32
+		if mainScreen.modifiedImage.IsGrayScale() {
+			histBefore = mainScreen.modifiedImage.Histogram().B
+			histAfter = heImage.Histogram().B
+		} else {
+			beforeImg := mainScreen.modifiedImage.Copy()
+			afterImg := heImage.Copy()
+			luminace := effects.Luminance{}
+			luminace.Apply(beforeImg)
+			luminace.Apply(afterImg)
+			scalingFactor := 255.0 / float32((beforeImg.Height() * beforeImg.Width()))
+			histBefore, _ = beforeImg.Histogram().CumulativeHistogram(photochopp.GrayChannel, scalingFactor)
+			histAfter, _ = afterImg.Histogram().CumulativeHistogram(photochopp.GrayChannel, scalingFactor)
+		}
+
+		windowHistBefore := NewHistogramWindow("hist-before", "Histogram Before", app, histBefore)
+		windowHistAfter := NewHistogramWindow("hist-after", "Histogram After", app, histAfter)
+		windowHistBefore.Show()
+		windowHistAfter.Show()
 	})
 
 	btnGaussianBlur := widget.NewButton("Gaussian Blur", func() {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fpi/photochopp"
 	"image/color"
 
 	"fyne.io/fyne/v2"
@@ -20,16 +19,16 @@ func (hs *HistogramScreen) Content() fyne.CanvasObject {
 	return hs.ctnMain
 }
 
-func (hs *HistogramScreen) PlotHistogram(histogram photochopp.Histogram) {
+func (hs *HistogramScreen) PlotHistogram(histogram [256]int32) {
 	MAX_HEIGHT := float32(250.0)
 	getLineHeight := func(pixelsCount, maxPixelsCount int32) float32 {
 		return MAX_HEIGHT * (float32(pixelsCount) / float32(maxPixelsCount))
 	}
 
-	maxPixelsCount, _ := histogram.MaxPixelsCount(photochopp.BlueChannel)
+	maxPixelsCount := arrayMaxValue(histogram[:])
 
 	histogramBox := container.NewWithoutLayout()
-	for i, pixelsCount := range histogram.B {
+	for i, pixelsCount := range histogram {
 		lineHeight := getLineHeight(pixelsCount, maxPixelsCount)
 
 		line := canvas.NewLine(color.White)
@@ -60,4 +59,25 @@ func NewHistogramScreen(app App, window fyne.Window) *HistogramScreen {
 	histogramScreen.ctnMain = container.NewCenter()
 
 	return histogramScreen
+}
+
+func NewHistogramWindow(id string, title string, app App, histogram [256]int32) fyne.Window {
+	window := app.NewWindow(id, title, 515, 330)
+	screen := NewHistogramScreen(app, window)
+
+	screen.PlotHistogram(histogram)
+
+	window.SetContent(screen.Content())
+	return window
+}
+
+func arrayMaxValue(array []int32) int32 {
+	var max int32
+	for i, value := range array {
+		if i == 0 || value > max {
+			max = value
+		}
+	}
+
+	return max
 }

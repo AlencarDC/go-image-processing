@@ -11,6 +11,7 @@ import (
 type ColorChannel uint8
 
 const (
+	GrayChannel  ColorChannel = 0
 	RedChannel   ColorChannel = 0
 	GreenChannel ColorChannel = 1
 	BlueChannel  ColorChannel = 2
@@ -125,4 +126,19 @@ func (img *Image) Copy() *Image {
 	draw.Draw(rgba, bounds, imgCopy, bounds.Min, draw.Src)
 
 	return &Image{img: &imgCopy, rgba: rgba}
+}
+
+func (img *Image) IsGrayScale() bool {
+	width, heigth := img.Width(), img.Height()
+
+	for i := 0; i < width; i += 1 {
+		for j := 0; j < heigth; j += 1 {
+			pixel := img.Pixel(i, j)
+			if pixel[0] != pixel[1] || pixel[1] != pixel[2] {
+				return false
+			}
+		}
+	}
+
+	return true
 }

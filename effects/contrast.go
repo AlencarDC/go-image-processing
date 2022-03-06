@@ -10,12 +10,12 @@ type Contrast struct {
 	Value int
 }
 
-func (b *Contrast) Apply(img *photochopp.Image) (err error) {
+func (c *Contrast) Apply(img *photochopp.Image) (err error) {
 	if img == nil {
 		return errors.New("effect: cannot apply contrast to a nil image")
 	}
 
-	value := int(math.Max(1, math.Min(float64(b.Value), 255)))
+	value := int(math.Max(1, math.Min(float64(c.Value), 255)))
 
 	width, height := img.Width(), img.Height()
 

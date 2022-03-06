@@ -19,27 +19,17 @@ func (hm *HistogramMatching) Apply(img *photochopp.Image) (err error) {
 	luminance.Apply(img)
 
 	targetAlpha := 255.0 / float32((hm.Target.Height() * hm.Target.Width()))
-	targetCumulativeHistogram, err := hm.Target.Histogram().CumulativeHistogram(photochopp.BlueChannel, targetAlpha)
+	targetCumulativeHistogram, err := hm.Target.Histogram().CumulativeHistogram(photochopp.GrayChannel, targetAlpha)
 	if err != nil {
 		return err
 	}
 	sourceAlpha := 255.0 / float32((img.Height() * img.Width()))
-	sourceCumulativeHistogram, err := img.Histogram().CumulativeHistogram(photochopp.BlueChannel, sourceAlpha)
+	sourceCumulativeHistogram, err := img.Histogram().CumulativeHistogram(photochopp.GrayChannel, sourceAlpha)
 	if err != nil {
 		return err
 	}
 
-	var HM [256]int32
-	for i := 0; i < 256; i += 1 {
-		histogramDiff := arrayAbsDiff(targetCumulativeHistogram[:], sourceCumulativeHistogram[i])
-		indexOfMinValues := arrayIndexOfMinValues(histogramDiff)
-
-		indexDiff := arrayAbsDiff(indexOfMinValues, int32(i))
-		minIndex := arrayIndexOfMinValue(indexDiff)
-		closestColor := indexOfMinValues[minIndex]
-
-		HM[i] = closestColor
-	}
+	HM := hm.calculateHM(sourceCumulativeHistogram, targetCumulativeHistogram)
 
 	for x := 0; x < img.Width(); x += 1 {
 		for y := 0; y < img.Height(); y += 1 {
@@ -50,6 +40,22 @@ func (hm *HistogramMatching) Apply(img *photochopp.Image) (err error) {
 		}
 	}
 	return nil
+}
+
+func (hm *HistogramMatching) calculateHM(sourceCumHist, targetCumHist [256]int32) [256]int32 {
+	var HM [256]int32
+	for i := 0; i < 256; i += 1 {
+		histogramDiff := arrayAbsDiff(targetCumHist[:], sourceCumHist[i])
+		indexOfMinValues := arrayIndexOfMinValues(histogramDiff)
+
+		indexDiff := arrayAbsDiff(indexOfMinValues, int32(i))
+		minIndex := arrayIndexOfMinValue(indexDiff)
+		closestColor := indexOfMinValues[minIndex]
+
+		HM[i] = closestColor
+	}
+
+	return HM
 }
 
 func arrayAbsDiff(array []int32, subValue int32) []int32 {

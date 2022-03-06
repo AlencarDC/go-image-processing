@@ -174,9 +174,9 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 	})
 	ctnBrightness := container.NewVBox(lblBrightnessValue, sliderBrightnessValue, btnBrightness)
 
-	lblContrastValue := widget.NewLabel("Contrast value: 0")
-	sliderContrastValue := widget.NewSlider(-255, 255)
-	sliderContrastValue.SetValue(0)
+	lblContrastValue := widget.NewLabel("Contrast value: 1")
+	sliderContrastValue := widget.NewSlider(1, 255)
+	sliderContrastValue.SetValue(1)
 	sliderContrastValue.Step = 1
 	sliderContrastValue.OnChanged = func(f float64) {
 		lblContrastValue.SetText("Contrast value: " + strconv.Itoa(int(f)))
@@ -196,7 +196,7 @@ func NewMainScreen(app App, window fyne.Window) *MainScreen {
 
 	btnHistogramEqualization := widget.NewButton("Histogram Equalization", func() {
 		heImage := mainScreen.modifiedImage.Copy()
-		he := &effects.GrayScaleHistogramEqualization{}
+		he := &effects.HistogramEqualization{}
 		he.Apply(heImage)
 
 		width, height := float32(heImage.Width()), float32(heImage.Height())

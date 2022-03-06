@@ -17,8 +17,7 @@ func (c *Convolve) Apply(img *photochopp.Image) (err error) {
 	}
 
 	width, height := img.Width(), img.Height()
-	kernelHeight := len(c.Kernel)
-	kernelWidth := len(c.Kernel[0])
+	kernelHeight, kernelWidth := len(c.Kernel), len(c.Kernel[0])
 	imgCopy := img.Copy()
 
 	for x := kernelWidth / 2; x < width-(kernelWidth/2); x += 1 {
@@ -33,7 +32,6 @@ func (c *Convolve) Apply(img *photochopp.Image) (err error) {
 			}
 
 			newPixel := c.clampPixel(convolvedPixel)
-
 			pixel := img.Pixel(x, y)
 			pixel[0] = newPixel[0]
 			pixel[1] = newPixel[1]
